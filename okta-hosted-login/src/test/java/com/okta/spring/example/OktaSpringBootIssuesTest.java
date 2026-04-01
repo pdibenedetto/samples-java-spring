@@ -15,6 +15,7 @@ package com.okta.spring.example;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -78,15 +79,18 @@ class OktaSpringBootIssuesTest {
     class Issue866_LoginPageReachable {
 
         @Test
+        @Timeout(15)
         @DisplayName("BUG: SpringApplication.run() throws when okta.oauth2.issuer points to an unreachable host")
         void contextFailsWhenIssuerIsUnreachable() {
-            // Reproduces issue #866: set okta.oauth2.issuer to a non-existent issuer.
-            // OktaOAuth2PropertiesMappingEnvironmentPostProcessor will make a network call
-            // and fail, preventing the application from starting.
+            // Reproduces issue #866: set okta.oauth2.issuer to a local port that immediately
+            // refuses connections (port 1 on loopback is always closed).
+            // Using localhost:1 instead of a DNS name avoids CI hangs from slow DNS timeouts
+            // on unresolvable hostnames (OktaOAuth2PropertiesMappingEnvironmentPostProcessor
+            // makes a live HTTP call and has no built-in socket timeout).
             assertThatThrownBy(() -> {
                 SpringApplication app = new SpringApplication(CodeFlowExampleApplication.class);
                 app.run(
-                    "--okta.oauth2.issuer=https://non-existent-issuer-that-does-not-exist.invalid/oauth2/default",
+                    "--okta.oauth2.issuer=http://localhost:1/oauth2/default",
                     "--okta.oauth2.client-id=test-id",
                     "--okta.oauth2.client-secret=test-secret",
                     "--server.port=0"
