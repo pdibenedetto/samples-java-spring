@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Collections;
 
 @SpringBootApplication
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class CodeFlowExampleApplication {
 
     public static void main(String[] args) {
@@ -37,11 +37,9 @@ public class CodeFlowExampleApplication {
                             .requestMatchers("/").permitAll()
                             .anyRequest().authenticated()
                     )
-                    .logout().logoutSuccessUrl("/")
-                    .and()
-                    .oauth2Client()
-                    .and()
-                    .oauth2Login();
+                    .logout((logout) -> logout.logoutSuccessUrl("/"))
+                    .oauth2Client(org.springframework.security.config.Customizer.withDefaults())
+                    .oauth2Login(org.springframework.security.config.Customizer.withDefaults());
 
             return http.build();
         }

@@ -23,6 +23,17 @@
         <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
+    <!-- CVE-2026-22732: override spring-security-web to patched version -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-web</artifactId>
+                <version>6.5.9</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
@@ -69,6 +80,44 @@
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <version>2.9.0</version>
+        </dependency>
+
+        <!-- Spring Boot and Security test support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Required because okta-spring-security-oauth2 marks spring-security-oauth2-resource-server
+             as optional; confirms Issue #762 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+        <!-- Explicit spring-security-config and spring-security-web to ensure HttpSecurity
+             is on the classpath; transitive resolution may fail in offline mode -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <!-- Required by OktaOAuth2Configurer (registered via spring.factories as AbstractHttpConfigurer) -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+            <version>6.5.1</version>
         </dependency>
 
         <!-- Okta's standard OAuth/OIDC tests, you do not need this in your project -->
